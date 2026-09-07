@@ -1,0 +1,20 @@
+{
+  "name": "loker-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=apps/web run dev",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "dev:api": "npm --workspace=apps/api run dev",
+    "build": "npm --workspace=apps/web run build && npm --workspace=apps/api run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "build:api": "npm --workspace=apps/api run build",
+    "preview": "npm --workspace=apps/web run preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
