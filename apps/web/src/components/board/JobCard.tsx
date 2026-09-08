@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { JobApplication, Stage } from '../../types/job';
+import { CompanyLogo } from '../common/CompanyLogo';
 
 interface JobCardProps {
   job: JobApplication;
@@ -52,11 +53,13 @@ export const JobCard: React.FC<JobCardProps> = ({
       {/* Card Header */}
       <div className="flex items-start justify-between gap-1">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <div
-            className={`w-6 h-6 rounded flex items-center justify-center font-bold text-[11px] select-none flex-shrink-0 ${job.logoColorClass}`}
-          >
-            {job.logoLetter}
-          </div>
+          <CompanyLogo
+            company={job.company}
+            logoLetter={job.logoLetter}
+            logoColorClass={job.logoColorClass}
+            companyLogo={job.companyLogo}
+            size="sm"
+          />
           <div className="min-w-0 flex-1">
             <h3 className="font-headline-sm text-xs font-semibold text-on-surface group-hover:text-secondary transition-colors truncate">
               {job.title}

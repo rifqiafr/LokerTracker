@@ -23,6 +23,7 @@ export interface JobApplication {
   company: string;
   logoLetter: string;
   logoColorClass: string;
+  companyLogo?: string;
   stage: Stage;
   workType: WorkType;
   location?: string;

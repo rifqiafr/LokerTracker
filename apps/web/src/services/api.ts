@@ -93,6 +93,9 @@ export const mapBackendJobToFrontend = (job: any): JobApplication => {
       month: 'short',
     }),
     notes: job.notes ? [job.notes] : [],
+    companyLogo: job.companyLogo || (job.notes && job.notes.includes('Logo: ')
+      ? job.notes.split('\n').find((l: string) => l.startsWith('Logo: '))?.replace('Logo: ', '').trim()
+      : undefined),
     applyUrl: job.notes && job.notes.includes('Link: ')
       ? job.notes.split('\n').find((l: string) => l.startsWith('Link: '))?.replace('Link: ', '').trim()
       : undefined,

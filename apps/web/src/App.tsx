@@ -213,6 +213,7 @@ export function App() {
       company: newJobData.company || 'Unknown Company',
       logoLetter: newJobData.logoLetter || 'UK',
       logoColorClass: newJobData.logoColorClass || 'bg-surface-container text-on-surface',
+      companyLogo: newJobData.companyLogo,
       stage: newJobData.stage || 'applied',
       workType: newJobData.workType || 'Remote',
       location: newJobData.location,
@@ -236,6 +237,7 @@ export function App() {
     if (getAuthToken()) {
       try {
         const fullNotes = [
+          newJobData.companyLogo ? `Logo: ${newJobData.companyLogo}` : '',
           newJobData.applyUrl ? `Link: ${newJobData.applyUrl}` : '',
           ...(newJobData.notes || []),
         ]

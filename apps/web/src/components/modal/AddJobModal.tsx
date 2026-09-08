@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { JobApplication, Stage, WorkType } from '../../types/job';
 import { jobsApi } from '../../services/api';
 import { parseJobText } from '../../utils/textJobParser';
+import { CompanyLogo } from '../common/CompanyLogo';
+import { resolveCompanyLogo } from '../../utils/companyLogo';
 
 interface AddJobModalProps {
   isOpen: boolean;
@@ -40,6 +42,29 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
   const [sourceTag, setSourceTag] = useState('LinkedIn');
   const [applyUrl, setApplyUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [companyLogo, setCompanyLogo] = useState('');
+
+  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Mohon pilih file gambar yang valid (JPG, PNG, WebP, SVG).');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran gambar maksimal 2 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (readerEvent) => {
+      const dataUrl = readerEvent.target?.result as string;
+      setCompanyLogo(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (!isOpen) return null;
 
@@ -54,6 +79,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     sourceTag: string;
     applyUrl?: string;
     notes?: string;
+    companyLogo?: string;
   }) => {
     const initials = jobData.company
       .split(' ')
@@ -71,9 +97,12 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     ];
     const randomColor = colorStyles[Math.floor(Math.random() * colorStyles.length)];
 
+    const finalLogo = resolveCompanyLogo(jobData.company, jobData.companyLogo || companyLogo);
+
     onAddJob({
       title: jobData.title.trim(),
       company: jobData.company.trim(),
+      companyLogo: finalLogo,
       stage: jobData.stage,
       workType: jobData.workType,
       location: jobData.location.trim(),
@@ -109,6 +138,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     setCompany('');
     setApplyUrl('');
     setNotes('');
+    setCompanyLogo('');
     setUrlInput('');
     setRawTextInput('');
     setExtractedPreview(null);
@@ -198,6 +228,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
       sourceTag,
       applyUrl,
       notes,
+      companyLogo,
     });
   };
 
@@ -215,6 +246,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
       sourceTag,
       applyUrl,
       notes,
+      companyLogo,
     });
   };
 
@@ -430,9 +462,18 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
                       <span className="text-outline block text-[10px] uppercase font-bold">Posisi</span>
                       <span className="font-semibold text-on-surface line-clamp-1">{title}</span>
                     </div>
-                    <div className="p-2 rounded-lg bg-surface-container-lowest/80 border border-surface-container/50">
-                      <span className="text-outline block text-[10px] uppercase font-bold">Perusahaan</span>
-                      <span className="font-semibold text-on-surface line-clamp-1">{company}</span>
+                    <div className="p-2 rounded-lg bg-surface-container-lowest/80 border border-surface-container/50 flex items-center gap-2">
+                      <CompanyLogo
+                        company={company}
+                        logoLetter={company ? company.charAt(0).toUpperCase() : 'LK'}
+                        logoColorClass="bg-surface-container-high text-secondary"
+                        companyLogo={companyLogo}
+                        size="sm"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-outline block text-[10px] uppercase font-bold">Perusahaan</span>
+                        <span className="font-semibold text-on-surface line-clamp-1">{company}</span>
+                      </div>
                     </div>
                     <div className="p-2 rounded-lg bg-surface-container-lowest/80 border border-surface-container/50">
                       <span className="text-outline block text-[10px] uppercase font-bold">Sistem & Lokasi</span>
@@ -510,6 +551,56 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Logo Preview & Custom Upload / URL */}
+              <div className="flex flex-col gap-1.5 p-2.5 rounded-lg bg-surface-container-low/60 border border-surface-container/50">
+                <div className="flex items-center justify-between">
+                  <label className="font-label-sm text-label-sm text-outline uppercase flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs">image</span>
+                    <span>Foto Profil / Logo Perusahaan</span>
+                  </label>
+                  {companyLogo && (
+                    <button
+                      type="button"
+                      onClick={() => setCompanyLogo('')}
+                      className="text-[11px] text-secondary hover:underline cursor-pointer"
+                    >
+                      Reset ke Otomatis
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <CompanyLogo
+                    company={company}
+                    logoLetter={company ? company.charAt(0).toUpperCase() : 'LK'}
+                    logoColorClass="bg-surface-container-high text-secondary"
+                    companyLogo={companyLogo}
+                    size="md"
+                  />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <input
+                      className="w-full px-2.5 py-1.5 bg-surface-container-lowest rounded-md text-body-sm font-body-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary border border-surface-container/50 text-xs"
+                      placeholder="URL logo atau nama domain (opsional, contoh: https://...)"
+                      value={companyLogo}
+                      onChange={(e) => setCompanyLogo(e.target.value)}
+                    />
+                    <div className="flex items-center justify-between text-[11px] text-outline">
+                      <span>Logo otomatis terdeteksi dari nama perusahaan</span>
+                      <label className="text-secondary hover:underline cursor-pointer flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">upload</span>
+                        <span>Unggah File</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleLogoFileUpload}
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 

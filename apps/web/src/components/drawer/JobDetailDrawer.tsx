@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { JobApplication, Stage } from '../../types/job';
+import { CompanyLogo } from '../common/CompanyLogo';
 
 interface JobDetailDrawerProps {
   job: JobApplication | null;
@@ -101,11 +102,13 @@ export const JobDetailDrawer: React.FC<JobDetailDrawerProps> = ({
         {/* Primary Title & Meta Banner */}
         <div className="flex flex-col gap-spacing-xs">
           <div className="flex items-center gap-spacing-sm">
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center font-headline-lg text-headline-lg font-bold shadow-sm ${job.logoColorClass}`}
-            >
-              {job.logoLetter}
-            </div>
+            <CompanyLogo
+              company={job.company}
+              logoLetter={job.logoLetter}
+              logoColorClass={job.logoColorClass}
+              companyLogo={job.companyLogo}
+              size="lg"
+            />
             <div className="flex flex-col">
               <h1 className="font-headline-lg text-headline-lg text-on-surface font-semibold">
                 {job.title}

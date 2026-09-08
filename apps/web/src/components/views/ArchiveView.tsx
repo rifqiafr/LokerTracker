@@ -1,5 +1,6 @@
 import React from 'react';
 import { JobApplication } from '../../types/job';
+import { CompanyLogo } from '../common/CompanyLogo';
 
 interface ArchiveViewProps {
   archivedJobs: JobApplication[];
@@ -42,11 +43,13 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-label-md ${job.logoColorClass}`}
-                  >
-                    {job.logoLetter}
-                  </div>
+                  <CompanyLogo
+                    company={job.company}
+                    logoLetter={job.logoLetter}
+                    logoColorClass={job.logoColorClass}
+                    companyLogo={job.companyLogo}
+                    size="md"
+                  />
                   <div>
                     <h4 className="font-headline-sm text-headline-sm font-semibold text-on-surface">
                       {job.title}
