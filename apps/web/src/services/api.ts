@@ -39,10 +39,16 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   let fullUrl = `${baseUrl}${cleanEndpoint}`.replace(/([^:]\/)\/+/g, '$1');
 
-  const response = await fetch(fullUrl, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(fullUrl, {
+      ...options,
+      headers,
+    });
+  } catch (err: any) {
+    console.error('Fetch error target:', fullUrl, err);
+    throw new Error(`Gagal memanggil (${fullUrl}): ${err.message || 'Periksa URL / koneksi'}`);
+  }
 
   let json: any;
   try {
