@@ -1,6 +1,9 @@
 import { JobApplication, Stage } from '../types/job';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const getBaseUrl = (): string => {
+  let url = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').trim();
+  return url.replace(/\/+$/, '');
+};
 
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -32,12 +35,21 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const baseUrl = getBaseUrl();
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  let fullUrl = `${baseUrl}${cleanEndpoint}`.replace(/([^:]\/)\/+/g, '$1');
+
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
 
-  const json = await response.json().catch(() => ({ success: false, message: 'Invalid response' }));
+  let json: any;
+  try {
+    json = await response.json();
+  } catch {
+    json = { success: false, message: `Server error (${response.status})` };
+  }
 
   if (!response.ok) {
     throw new Error(json.message || `Request failed with status ${response.status}`);

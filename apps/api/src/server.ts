@@ -32,15 +32,22 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+// Clean duplicate slashes in request URL
+app.use((req, _res, next) => {
+  req.url = req.url.replace(/\/{2,}/g, '/');
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check
-app.get(['/health', '/api/health'], (_req, res) => {
+// Health & Root Check
+app.get(['/', '/api', '/health', '/api/health'], (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'LOKER Backend API',
+    message: 'Backend LokerTracker berjalan lancar',
   });
 });
 
