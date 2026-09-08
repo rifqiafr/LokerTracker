@@ -256,6 +256,35 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
               </>
             )}
           </button>
+
+          {/* Demo Guest Mode */}
+          <div className="relative flex items-center justify-center my-2">
+            <div className="border-t border-surface-container w-full" />
+            <span className="bg-surface-container-lowest px-2 text-[10px] text-outline uppercase font-semibold">
+              atau
+            </span>
+            <div className="border-t border-surface-container w-full" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const demoUser = {
+                name: 'Tamu Demo',
+                email: 'demo@loker.id',
+                avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+              };
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('loker_user', JSON.stringify(demoUser));
+                window.location.hash = '#board';
+              }
+              onLoginSuccess(demoUser);
+            }}
+            className="w-full py-1.5 px-3 rounded-lg border border-outline-variant/60 text-secondary hover:bg-surface-container-high font-headline-sm text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-sm">visibility</span>
+            <span>Masuk Mode Tamu / Demo (Offline)</span>
+          </button>
         </form>
 
         {/* Footer Switcher */}
