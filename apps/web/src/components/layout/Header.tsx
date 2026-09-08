@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface HeaderProps {
-  searchTerm: string;
-  onSearchChange: (val: string) => void;
+  searchTerm?: string;
+  onSearchChange?: (val: string) => void;
   userAvatarUrl?: string;
   onOpenSettings?: () => void;
   isDarkMode?: boolean;
@@ -11,8 +11,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  searchTerm,
-  onSearchChange,
   userAvatarUrl: customAvatarUrl,
   onOpenSettings,
   isDarkMode = false,
@@ -25,8 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="w-full h-14 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 flex items-center justify-between px-3 sm:px-spacing-lg border-b border-surface-container/50 flex-shrink-0 gap-2">
-      {/* Left side: Mobile Hamburger + Search Input */}
-      <div className="flex items-center gap-1.5 sm:gap-spacing-sm flex-1 max-w-xs sm:max-w-md md:max-w-lg min-w-0">
+      {/* Left side: Mobile Hamburger */}
+      <div className="flex items-center gap-2">
         {onToggleMobileNav && (
           <button
             type="button"
@@ -38,19 +36,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="material-symbols-outlined text-2xl">menu</span>
           </button>
         )}
-
-        <div className="relative w-full flex items-center min-w-0">
-          <span className="material-symbols-outlined absolute left-2.5 sm:left-3 text-outline text-base sm:text-lg pointer-events-none">
-            search
-          </span>
-          <input
-            className="w-full pl-8 sm:pl-9 pr-2.5 sm:pr-spacing-sm py-1.5 sm:py-spacing-2xs bg-surface-container-lowest rounded-lg text-on-surface font-body-sm text-xs sm:text-body-sm placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-transparent focus:border-secondary/20 truncate"
-            placeholder="Cari posisi / perusahaan..."
-            type="text"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
       </div>
 
       {/* Right side: Actions and User */}

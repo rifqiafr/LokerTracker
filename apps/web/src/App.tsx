@@ -428,8 +428,6 @@ export function App() {
       <div className="w-full lg:pl-60 h-screen flex flex-col overflow-hidden">
         {/* Top Header */}
         <Header
-          searchTerm={searchQuery}
-          onSearchChange={setSearchQuery}
           userAvatarUrl={currentUser?.avatarUrl}
           onOpenSettings={() => setCurrentTab('settings')}
           isDarkMode={isDarkMode}
