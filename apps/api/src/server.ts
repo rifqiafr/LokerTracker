@@ -46,8 +46,13 @@ app.get(['/health', '/api/health'], (_req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/jobs', jobsRoutes);
+app.use('/jobs', jobsRoutes);
+
 app.use('/api/analytics', analyticsRoutes);
+app.use('/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -66,7 +71,11 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server LOKER berjalan di http://localhost:${PORT}`);
-  console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server LOKER berjalan di http://localhost:${PORT}`);
+    console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
+  });
+}
+
+export default app;
