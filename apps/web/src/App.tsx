@@ -376,11 +376,15 @@ export function App() {
           onLoginSuccess={(userData) => {
             setCurrentUser(userData);
             setIsAuthenticated(true);
+            setJobs([]);
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('loker_cached_jobs');
+            }
             window.location.hash = '';
             setToastInfo({
               isOpen: true,
               title: 'Berhasil Masuk',
-              message: `Selamat datang kembali, ${userData.name}!`,
+              message: `Selamat datang, ${userData.name}!`,
             });
           }}
         />

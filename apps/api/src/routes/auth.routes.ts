@@ -73,66 +73,6 @@ router.post('/register', async (req, res: Response): Promise<void> => {
       },
     });
 
-    // Create starter jobs for new user
-    const starterJobs = [
-      {
-        company: 'Tokopedia',
-        role: 'Fullstack Engineer',
-        location: 'Jakarta (Hybrid)',
-        salary: 'Rp 14.000.000 - Rp 22.000.000',
-        status: 'applied',
-        priority: 'high',
-        notes: 'Applied via Career Site. Stack: React & Go.',
-        tags: ['React', 'Go', 'Hybrid'],
-        orderIndex: 0,
-      },
-      {
-        company: 'Gojek Indonesia',
-        role: 'Frontend Developer',
-        location: 'Remote',
-        salary: 'Rp 15.000.000 - Rp 25.000.000',
-        status: 'test',
-        priority: 'high',
-        notes: 'Selesaikan tes teknikal HackerRank.',
-        tags: ['React', 'TypeScript', 'Remote'],
-        orderIndex: 0,
-      },
-      {
-        company: 'Traveloka',
-        role: 'Software Engineer',
-        location: 'Jakarta',
-        salary: 'Rp 18.000.000 - Rp 26.000.000',
-        status: 'interview',
-        priority: 'medium',
-        notes: 'Jadwal User Interview teknikal.',
-        tags: ['Backend', 'System Design'],
-        orderIndex: 0,
-      },
-    ];
-
-    for (const j of starterJobs) {
-      await prisma.job.create({
-        data: {
-          userId: newUser.id,
-          company: j.company,
-          role: j.role,
-          location: j.location,
-          salary: j.salary,
-          status: j.status,
-          priority: j.priority,
-          notes: j.notes,
-          tags: JSON.stringify(j.tags),
-          orderIndex: j.orderIndex,
-          timeline: {
-            create: {
-              stageTo: j.status,
-              notes: 'Lamaran awal dibuat',
-            },
-          },
-        },
-      });
-    }
-
     const token = createToken(newUser);
 
     res.status(201).json({
