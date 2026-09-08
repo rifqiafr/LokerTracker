@@ -96,6 +96,9 @@ export const mapBackendJobToFrontend = (job: any): JobApplication => {
     companyLogo: job.companyLogo || (job.notes && job.notes.includes('Logo: ')
       ? job.notes.split('\n').find((l: string) => l.startsWith('Logo: '))?.replace('Logo: ', '').trim()
       : undefined),
+    schedule: job.schedule || (job.notes && job.notes.includes('Schedule: ')
+      ? job.notes.split('\n').find((l: string) => l.startsWith('Schedule: '))?.replace('Schedule: ', '').trim()
+      : undefined),
     applyUrl: job.notes && job.notes.includes('Link: ')
       ? job.notes.split('\n').find((l: string) => l.startsWith('Link: '))?.replace('Link: ', '').trim()
       : undefined,
@@ -220,6 +223,18 @@ export const jobsApi = {
   },
 
   async updateJob(id: string, payload: Partial<JobApplication>) {
+    const rawNotes = (payload.notes || []).filter(
+      (line) => !line.startsWith('Logo: ') && !line.startsWith('Link: ') && !line.startsWith('Schedule: ')
+    );
+    const fullNotes = [
+      payload.companyLogo ? `Logo: ${payload.companyLogo}` : '',
+      payload.applyUrl ? `Link: ${payload.applyUrl}` : '',
+      payload.schedule ? `Schedule: ${payload.schedule}` : '',
+      ...rawNotes,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
     const res = await apiFetch<{
       success: boolean;
       data: { job: any };
@@ -232,7 +247,7 @@ export const jobsApi = {
         salary: payload.salary,
         status: payload.stage,
         priority: payload.priority,
-        notes: payload.notes?.join('\n'),
+        notes: fullNotes,
         tags: payload.tags,
       }),
     });
