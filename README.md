@@ -1,6 +1,7 @@
 # LOKER - Job Tracker Monorepo
 
-> 📖 **Dokumentasi Lengkap & Panduan Penggunaan**: Silakan baca **[PANDUAN_PENGGUNAAN.md](file:///c:/laragon/www/Loker/PANDUAN_PENGGUNAAN.md)** untuk panduan instalasi, fitur, dan arsitektur lengkap dalam Bahasa Indonesia.
+> 📖 **Dokumentasi Lengkap & Panduan Penggunaan**: Silakan baca **[PANDUAN_PENGGUNAAN.md](file:///c:/laragon/www/Loker/PANDUAN_PENGGUNAAN.md)**.
+> 🚀 **Panduan Deploy Gratis**: Ikuti petunjuk deploy Vercel & Cloud di **[PANDUAN_DEPLOY.md](file:///c:/laragon/www/Loker/PANDUAN_DEPLOY.md)**.
 
 A modern, high-performance job application tracking platform built with **React**, **Vite**, **TypeScript**, **Tailwind CSS**, and **Express + SQLite (Prisma)** using standard npm workspaces.
 
