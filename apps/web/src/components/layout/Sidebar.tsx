@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import brandLogo from '../../assets/logo.png';
 
 export type NavTab = 'board' | 'analytics' | 'archive' | 'settings';
@@ -22,6 +22,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenMobile = false,
   onCloseMobile,
 }) => {
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+      }
+
+      const handler = (e: any) => {
+        e.preventDefault();
+        setInstallPrompt(e);
+      };
+      window.addEventListener('beforeinstallprompt', handler);
+      window.addEventListener('appinstalled', () => {
+        setIsInstalled(true);
+        setInstallPrompt(null);
+      });
+
+      return () => window.removeEventListener('beforeinstallprompt', handler);
+    }
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setInstallPrompt(null);
+      }
+    } else {
+      alert(
+        'Untuk memasang LOKER sebagai Desktop App:\n\n' +
+        '1. Pada Google Chrome / Edge, klik ikon "Install" (komputer kecil dengan panah ke bawah) di ujung kanan bilah alamat (URL bar).\n' +
+        '2. Atau klik menu titik tiga (⋮) di pojok kanan atas browser -> pilih "Install LOKER - Job Tracker".\n\n' +
+        'Aplikasi akan langsung muncul di Desktop & Taskbar Windows Anda!'
+      );
+    }
+  };
+
   const userAvatarUrl =
     'https://lh3.googleusercontent.com/aida-public/AB6AXuB54bT0t_lepVc3X6-LB6CyaOAxXOYuvXBcabktZAdJ-8mqfGquckld8-MY1J673PGF2hwi4mUmhO9oPuk2CuNtm2Xp_5mXloCLuBkxnfjAG_gr15l4aYcLKGe7qxENguCwVCYh2FZnzBQhWv9FcZB0UvDIVF_okLguwuMsbG9mCJoy2df2jf_sN0rU4Py_JQwvXtHiDnUQzUbAjjq_CHPUDms7vCwhAvSPC484xGi5RKr468O1iXDq';
 
@@ -157,6 +197,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="font-body-md text-body-md">Pengaturan</span>
               </div>
             </button>
+
+            {/* Install Desktop App Button */}
+            {!isInstalled && (
+              <div className="pt-2 mt-2 border-t border-surface-container/60">
+                <button
+                  type="button"
+                  onClick={handleInstallApp}
+                  className="flex items-center justify-between w-full px-spacing-sm py-2 rounded-lg transition-all text-left cursor-pointer text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/25 shadow-xs"
+                  title="Pasang LOKER sebagai Desktop App di Windows"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg leading-none">desktop_windows</span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-xs leading-tight">Install Desktop App</span>
+                      <span className="text-[10px] text-on-surface-variant leading-tight">Shortcut di Windows</span>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-sm">download</span>
+                </button>
+              </div>
+            )}
           </nav>
         </div>
 
