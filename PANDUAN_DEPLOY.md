@@ -33,32 +33,36 @@ Frontend dibuat dengan React + Vite dan memiliki sistem penyimpanan data lokal (
 
 ---
 
-## 🌐 Bagian 2: Menghubungkan Backend & Database Cloud (Opsional / Fullstack)
+## 🌐 Bagian 2: Deploy Backend ke Vercel (100% di Vercel, Tanpa Akun Tambahan)
 
-Jika Anda ingin mengaktifkan fitur multi-user login, sinkronisasi data antar perangkat (HP & PC), serta scraper link lowongan otomatis:
+Backend Express sekarang sudah siap berjalan sebagai **Vercel Serverless Function**. Anda tidak perlu mendaftar ke platform lain!
 
-### 1. Buat Database PostgreSQL Gratis (Supabase / Neon)
-1. Buka [Supabase.com](https://supabase.com) atau [Neon.tech](https://neon.tech), lalu buat akun gratis.
-2. Buat project baru (misal diberi nama `loker-db`).
-3. Salin **Connection String (URI)** database Anda. Formatnya:
-   ```env
-   postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-   ```
+### 1. Buat Project Baru di Vercel untuk API:
+1. Buka dashboard [vercel.com](https://vercel.com).
+2. Klik tombol **"Add New..."** $\rightarrow$ pilih **"Project"**.
+3. Pilih repository yang sama: **`LokerTracker`** $\rightarrow$ klik **"Import"**.
+4. Beri **Project Name**: `lokertracker-api`
+5. Pada bagian **"Root Directory"**, klik **"Edit"** $\rightarrow$ pilih folder **`apps/api`** $\rightarrow$ klik **"Continue"**.
+6. Buka bagian **"Environment Variables"**, masukkan 2 variabel berikut:
+   - **Key 1**: `DATABASE_URL`
+     - **Value**: `postgresql://neondb_owner:npg_Vt0Qln6JwsRd@ep-sparkling-rice-az7j75yi-pooler.c-3.ap-southeast-1.aws.neon.tech/loker-db?sslmode=require`
+   - **Key 2**: `JWT_SECRET`
+     - **Value**: `loker_rahasia_jwt_super_aman_2026`
+7. Klik tombol biru **"Deploy"**!
+8. Dalam ~30 detik, API Anda sudah aktif dengan URL seperti:
+   `https://lokertracker-api.vercel.app`
 
-### 2. Update Skema Prisma
-Di file `apps/api/prisma/schema.prisma`, ubah bagian datasource menjadi:
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
-Lalu jalankan push skema:
-```bash
-npm --workspace=apps/api run db:push
-```
+---
 
-### 3. Deploy Backend ke Render.com (Gratis)
+### 2. Hubungkan Frontend ke Backend API:
+1. Buka project **Frontend** Anda di Vercel (project pertama).
+2. Masuk ke menu **Settings** $\rightarrow$ **Environment Variables**.
+3. Tambahkan variabel:
+   - **Key**: `VITE_API_BASE_URL`
+   - **Value**: `https://lokertracker-api.vercel.app/api` *(ganti dengan URL API Vercel Anda, tambahkan `/api` di ujungnya)*
+4. Masuk ke tab **Deployments** $\rightarrow$ klik titik tiga `...` di deployment teratas $\rightarrow$ pilih **"Redeploy"**.
+5. Selesai! Register akun baru dan Login sekarang berfungsi 100%!
+
 1. Buka [Render.com](https://render.com) dan login dengan GitHub.
 2. Klik **"New +"** $\rightarrow$ **"Web Service"**.
 3. Pilih repository `LokerTracker`.
