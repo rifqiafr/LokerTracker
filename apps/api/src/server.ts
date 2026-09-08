@@ -32,6 +32,7 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+app.options('*', cors());
 // Clean duplicate slashes in request URL
 app.use((req, _res, next) => {
   req.url = req.url.replace(/\/{2,}/g, '/');
