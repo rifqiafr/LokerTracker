@@ -2,6 +2,14 @@ export type Stage = 'applied' | 'test' | 'interview' | 'offered' | 'rejected';
 
 export type WorkType = 'Remote' | 'Hybrid' | 'On-site';
 
+export type SortOption =
+  | 'date-desc'
+  | 'date-asc'
+  | 'title-asc'
+  | 'title-desc'
+  | 'company-asc'
+  | 'company-desc';
+
 export interface TimelineMilestone {
   id: string;
   title: string;
@@ -21,6 +29,7 @@ export interface JobApplication {
   id: string;
   title: string;
   company: string;
+  createdAt?: string;
   logoLetter: string;
   logoColorClass: string;
   companyLogo?: string;

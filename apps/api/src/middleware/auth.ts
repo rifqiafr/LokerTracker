@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { prisma } from '../lib/prisma.js';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -9,11 +10,11 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authenticateToken = (
+export const authenticateToken = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.startsWith('Bearer ')
     ? authHeader.slice(7)
@@ -35,10 +36,25 @@ export const authenticateToken = (
       email: string;
       name: string;
     };
-    req.user = decoded;
+
+    // Verify that user exists in database to prevent foreign key errors
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, email: true, name: true },
+    });
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: 'Pengguna tidak ditemukan di database. Sesi mungkin telah berakhir, silakan login kembali.',
+      });
+      return;
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    res.status(403).json({
+    res.status(401).json({
       success: false,
       message: 'Token tidak valid atau telah kedaluwarsa.',
     });

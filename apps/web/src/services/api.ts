@@ -57,6 +57,13 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     json = { success: false, message: `Server error (${response.status})` };
   }
 
+  if (response.status === 401) {
+    clearAuthToken();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
+  }
+
   if (!response.ok) {
     throw new Error(json.message || `Request failed with status ${response.status}`);
   }
@@ -78,6 +85,7 @@ export const mapBackendJobToFrontend = (job: any): JobApplication => {
     id: job.id,
     title: job.role,
     company: job.company,
+    createdAt: job.createdAt || job.dateApplied || undefined,
     location: job.location,
     salary: job.salary || undefined,
     stage: (job.status as Stage) || 'applied',

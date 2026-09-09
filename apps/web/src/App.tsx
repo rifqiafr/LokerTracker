@@ -11,8 +11,38 @@ import { SettingsView } from './components/views/SettingsView';
 import { AuthPage } from './components/auth/AuthPage';
 import { Toast } from './components/common/Toast';
 import { COLUMNS, INITIAL_JOBS } from './data/initialJobs';
-import { JobApplication, Stage } from './types/job';
+import { JobApplication, Stage, SortOption } from './types/job';
 import { jobsApi, authApi, getAuthToken, clearAuthToken } from './services/api';
+
+const getJobTimestamp = (job: JobApplication): number => {
+  if (job.createdAt) {
+    const t = new Date(job.createdAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (job.appliedDate) {
+    const parsed = Date.parse(job.appliedDate);
+    if (!isNaN(parsed)) return parsed;
+
+    const months: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5,
+      jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11,
+    };
+    const parts = job.appliedDate.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      const day = parseInt(parts[0], 10);
+      const mStr = parts[1].toLowerCase().slice(0, 3);
+      const year = parts[2] ? parseInt(parts[2], 10) : new Date().getFullYear();
+      if (!isNaN(day) && months[mStr] !== undefined) {
+        return new Date(year, months[mStr], day).getTime();
+      }
+    }
+  }
+  if (job.id.startsWith('job-')) {
+    const num = Number(job.id.replace('job-', ''));
+    if (!isNaN(num)) return num;
+  }
+  return 0;
+};
 
 export function App() {
   // Authentication state
@@ -53,8 +83,23 @@ export function App() {
         setIsAuthenticated(true);
       }
     };
+
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+      window.location.hash = '#login';
+      setToastInfo({
+        isOpen: true,
+        title: 'Sesi Berakhir',
+        message: 'Pengguna tidak ditemukan di database. Silakan login kembali.',
+      });
+    };
+
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
   }, []);
 
   // Dark mode state
@@ -168,9 +213,25 @@ export function App() {
     message: '',
   });
 
-  // Filter logic: only exclude archived and match search text
+  // Sort State
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('loker_sort_by') as SortOption;
+      if (saved) return saved;
+    }
+    return 'date-desc';
+  });
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSortBy(newSort);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('loker_sort_by', newSort);
+    }
+  };
+
+  // Filter & Sort logic: exclude archived, match search, and sort by chosen criteria
   const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
+    const filtered = jobs.filter((job) => {
       // Exclude archived from active board
       if (job.isArchived) return false;
 
@@ -189,7 +250,29 @@ export function App() {
 
       return true;
     });
-  }, [jobs, searchQuery]);
+
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'title-asc':
+          return a.title.localeCompare(b.title, 'id', { sensitivity: 'base' });
+        case 'title-desc':
+          return b.title.localeCompare(a.title, 'id', { sensitivity: 'base' });
+        case 'company-asc':
+          return a.company.localeCompare(b.company, 'id', { sensitivity: 'base' });
+        case 'company-desc':
+          return b.company.localeCompare(a.company, 'id', { sensitivity: 'base' });
+        case 'date-asc': {
+          const diff = getJobTimestamp(a) - getJobTimestamp(b);
+          return diff !== 0 ? diff : a.title.localeCompare(b.title);
+        }
+        case 'date-desc':
+        default: {
+          const diff = getJobTimestamp(b) - getJobTimestamp(a);
+          return diff !== 0 ? diff : a.title.localeCompare(b.title);
+        }
+      }
+    });
+  }, [jobs, searchQuery, sortBy]);
 
   const totalActiveCount = jobs.filter((j) => !j.isArchived).length;
   const archivedJobs = jobs.filter((j) => j.isArchived);
@@ -221,6 +304,7 @@ export function App() {
       salaryMin: 15,
       salaryMax: 25,
       appliedDate: newJobData.appliedDate,
+      createdAt: new Date().toISOString(),
       applyUrl: newJobData.applyUrl,
       notes: newJobData.notes,
       timeline: newJobData.timeline,
@@ -445,6 +529,8 @@ export function App() {
               <FilterBar
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
+                sortBy={sortBy}
+                onSortChange={handleSortChange}
                 displayedCount={filteredJobs.length}
                 totalCount={totalActiveCount}
                 onOpenAddJob={() => handleOpenAddModal('applied')}
