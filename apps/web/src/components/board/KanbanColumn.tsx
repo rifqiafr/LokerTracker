@@ -86,7 +86,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`w-full min-w-0 h-full flex flex-col bg-surface-container-low/70 p-spacing-xs rounded-xl relative border transition-all duration-150 overflow-hidden ${
+      className={`w-full min-w-0 h-full min-h-0 max-h-full flex flex-col bg-surface-container-low/70 p-spacing-xs rounded-xl relative border transition-all duration-150 overflow-hidden ${
         isDragOver
           ? 'border-secondary ring-2 ring-secondary/30 bg-secondary-fixed/15'
           : 'border-surface-container-low'
@@ -129,11 +129,11 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         </div>
       )}
 
-      {/* Cards List Container - scrollable internally without scrollbars */}
+      {/* Cards List Container - scrollable internally with custom scrollbar */}
       <div
         ref={scrollRef}
         onScroll={checkScroll}
-        className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-spacing-xs pr-0.5"
+        className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-spacing-xs pr-1 custom-scrollbar"
       >
         {/* Dynamic Drop Zone when dragging over this column */}
         {isDragOver && (
