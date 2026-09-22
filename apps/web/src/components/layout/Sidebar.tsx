@@ -93,10 +93,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Brand Header */}
           <div className="h-14 lg:h-16 flex items-center justify-between px-spacing-md bg-surface-container-low/40 border-b border-surface-container/50">
             <div className="flex items-center gap-spacing-xs">
-              <div className="h-9 w-9 rounded-xl overflow-hidden shadow-sm flex-shrink-0 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl overflow-hidden shadow-xs flex-shrink-0 flex items-center justify-center bg-white ring-1 ring-slate-200/80">
                 <img
-                  alt="LOKER Brand Logo"
-                  className="h-full w-full object-cover"
+                  alt="JobTracker Brand Logo"
+                  className="h-full w-full object-contain p-1"
                   src={brandLogo}
                 />
               </div>

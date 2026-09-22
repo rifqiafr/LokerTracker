@@ -76,10 +76,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-xl border border-surface-container/70 p-7 flex flex-col gap-5 z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="h-12 w-12 rounded-2xl overflow-hidden shadow-md flex items-center justify-center">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-md flex items-center justify-center bg-white p-1.5 ring-1 ring-slate-200/80">
             <img
-              alt="LOKER Brand Logo"
-              className="h-full w-full object-cover"
+              alt="JobTracker Brand Logo"
+              className="h-full w-full object-contain"
               src={brandLogo}
             />
           </div>
