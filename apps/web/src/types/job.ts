@@ -52,11 +52,15 @@ export interface JobApplication {
   isArchived?: boolean;
   timeline?: TimelineMilestone[];
   attachment?: JobAttachment;
+  deadline?: string;
+  isClosed?: boolean;
   notes?: string[];
   applyUrl?: string;
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
 }
+
+export type JobStatusFilter = 'all' | 'active' | 'closed';
 
 export interface ColumnDefinition {
   id: Stage;

@@ -110,6 +110,16 @@ export const mapBackendJobToFrontend = (job: any): JobApplication => {
     applyUrl: job.notes && job.notes.includes('Link: ')
       ? job.notes.split('\n').find((l: string) => l.startsWith('Link: '))?.replace('Link: ', '').trim()
       : undefined,
+    deadline: job.deadline
+      ? new Date(job.deadline).toISOString().split('T')[0]
+      : (job.notes && job.notes.includes('Deadline: ')
+      ? job.notes.split('\n').find((l: string) => l.startsWith('Deadline: '))?.replace('Deadline: ', '').trim()
+      : undefined),
+    isClosed: Boolean(
+      job.isClosed ||
+      (Array.isArray(job.tags) && job.tags.includes('closed')) ||
+      (job.notes && job.notes.includes('Closed: true'))
+    ),
     tags: Array.isArray(job.tags) ? job.tags : [],
     priority: job.priority,
     isArchived: Boolean(job.isArchived),
@@ -206,15 +216,32 @@ export const jobsApi = {
     salary?: string;
     status: Stage;
     priority?: 'high' | 'medium' | 'low';
+    deadline?: string;
+    isClosed?: boolean;
     notes?: string;
     tags?: string[];
   }) {
+    const tags = Array.isArray(payload.tags) ? [...payload.tags] : [];
+    if (payload.isClosed && !tags.includes('closed')) {
+      tags.push('closed');
+    }
+    const extraNotes = [
+      payload.isClosed ? 'Closed: true' : '',
+      payload.deadline ? `Deadline: ${payload.deadline}` : '',
+      payload.notes || '',
+    ].filter(Boolean).join('\n');
+
     const res = await apiFetch<{
       success: boolean;
       data: { job: any };
     }>('/jobs', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        deadline: payload.deadline || undefined,
+        notes: extraNotes,
+        tags,
+      }),
     });
     return mapBackendJobToFrontend(res.data.job);
   },
@@ -232,16 +259,31 @@ export const jobsApi = {
 
   async updateJob(id: string, payload: Partial<JobApplication>) {
     const rawNotes = (payload.notes || []).filter(
-      (line) => !line.startsWith('Logo: ') && !line.startsWith('Link: ') && !line.startsWith('Schedule: ')
+      (line) =>
+        !line.startsWith('Logo: ') &&
+        !line.startsWith('Link: ') &&
+        !line.startsWith('Schedule: ') &&
+        !line.startsWith('Closed: ') &&
+        !line.startsWith('Deadline: ')
     );
     const fullNotes = [
       payload.companyLogo ? `Logo: ${payload.companyLogo}` : '',
       payload.applyUrl ? `Link: ${payload.applyUrl}` : '',
       payload.schedule ? `Schedule: ${payload.schedule}` : '',
+      payload.deadline ? `Deadline: ${payload.deadline}` : '',
+      payload.isClosed ? 'Closed: true' : '',
       ...rawNotes,
     ]
       .filter(Boolean)
       .join('\n');
+
+    const tags = Array.isArray(payload.tags) ? [...payload.tags] : [];
+    if (payload.isClosed) {
+      if (!tags.includes('closed')) tags.push('closed');
+    } else {
+      const idx = tags.indexOf('closed');
+      if (idx !== -1) tags.splice(idx, 1);
+    }
 
     const res = await apiFetch<{
       success: boolean;
@@ -255,8 +297,9 @@ export const jobsApi = {
         salary: payload.salary,
         status: payload.stage,
         priority: payload.priority,
+        deadline: payload.deadline || undefined,
         notes: fullNotes,
-        tags: payload.tags,
+        tags,
       }),
     });
     return mapBackendJobToFrontend(res.data.job);

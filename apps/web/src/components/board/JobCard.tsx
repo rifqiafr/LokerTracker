@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { JobApplication, Stage } from '../../types/job';
 import { CompanyLogo } from '../common/CompanyLogo';
+import { getJobExpiryStatus } from '../../utils/jobExpiry';
 
 interface JobCardProps {
   job: JobApplication;
   onSelect: (job: JobApplication) => void;
   onMoveStage?: (jobId: string, newStage: Stage) => void;
   onArchive?: (jobId: string) => void;
+  onToggleClosed?: (jobId: string, isClosed: boolean) => void;
   onDragStartCard?: (e: React.DragEvent, jobId: string) => void;
   onDragEndCard?: (e: React.DragEvent) => void;
   isSelected?: boolean;
@@ -17,12 +19,15 @@ export const JobCard: React.FC<JobCardProps> = ({
   onSelect,
   onMoveStage,
   onArchive,
+  onToggleClosed,
   onDragStartCard,
   onDragEndCard,
   isSelected = false,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  const expiry = getJobExpiryStatus(job);
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -47,8 +52,15 @@ export const JobCard: React.FC<JobCardProps> = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onClick={() => onSelect(job)}
-      className={`group relative flex flex-col gap-1.5 p-2 bg-surface-container-lowest rounded-lg shadow-xs hover:shadow-md transition-all cursor-grab active:cursor-grabbing border select-none ${isSelected ? 'border-secondary ring-2 ring-secondary/20' : 'border-surface-container/30'
-        } ${isDragging ? 'opacity-40 scale-[0.98] ring-2 ring-secondary/40 rotate-1 shadow-lg' : ''}`}
+      className={`group relative flex flex-col gap-1.5 p-2 rounded-lg shadow-xs hover:shadow-md transition-all cursor-grab active:cursor-grabbing border select-none ${
+        expiry.isClosedOrExpired
+          ? 'bg-surface-container-low/70 border-error/30 dark:border-error/20 hover:border-error/50'
+          : expiry.isExpiringSoon
+          ? 'bg-amber-500/5 border-amber-500/40 hover:border-amber-500/60'
+          : isSelected
+          ? 'bg-surface-container-lowest border-secondary ring-2 ring-secondary/20'
+          : 'bg-surface-container-lowest border-surface-container/30'
+      } ${isDragging ? 'opacity-40 scale-[0.98] ring-2 ring-secondary/40 rotate-1 shadow-lg' : ''}`}
     >
       {/* Card Header */}
       <div className="flex items-start justify-between gap-1">
@@ -110,6 +122,25 @@ export const JobCard: React.FC<JobCardProps> = ({
                   </button>
                 )
               )}
+              {onToggleClosed && (
+                <div className="border-t border-surface-container mt-1 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onToggleClosed(job.id, !job.isClosed);
+                      setShowMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-1 text-[11px] transition-colors flex items-center gap-1.5 ${
+                      job.isClosed ? 'text-secondary hover:bg-secondary/10' : 'text-error hover:bg-error/10'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-xs">
+                      {job.isClosed ? 'check_circle' : 'cancel'}
+                    </span>
+                    {job.isClosed ? 'Buka Penerimaan' : 'Tutup Penerimaan'}
+                  </button>
+                </div>
+              )}
               {onArchive && (
                 <div className="border-t border-surface-container mt-1 pt-1">
                   <button
@@ -130,8 +161,35 @@ export const JobCard: React.FC<JobCardProps> = ({
         </div>
       </div>
 
-      {/* Meta Pills (WorkType, Location, Salary) */}
+      {/* Expiry / Closed & Meta Pills */}
       <div className="flex flex-wrap items-center gap-1 pt-0.5">
+        {expiry.isClosedOrExpired && (
+          <span
+            title={expiry.sublabel || expiry.label}
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold ${expiry.badgeClass}`}
+          >
+            <span className="material-symbols-outlined text-[11px]">{expiry.icon}</span>
+            <span>{expiry.label}</span>
+          </span>
+        )}
+        {expiry.isExpiringSoon && (
+          <span
+            title={expiry.sublabel || expiry.label}
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold ${expiry.badgeClass}`}
+          >
+            <span className="material-symbols-outlined text-[11px]">{expiry.icon}</span>
+            <span>{expiry.label}</span>
+          </span>
+        )}
+        {!expiry.isClosedOrExpired && !expiry.isExpiringSoon && expiry.formattedDeadline && (
+          <span
+            title={`Batas Waktu: ${expiry.formattedDeadline}`}
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-surface-container text-on-surface-variant rounded text-[10px]"
+          >
+            <span className="material-symbols-outlined text-[11px]">event</span>
+            <span>{expiry.formattedDeadline}</span>
+          </span>
+        )}
         {job.workType === 'Remote' && (
           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-secondary-fixed/50 text-on-secondary-fixed-variant rounded text-[10px] font-medium">
             <span className="material-symbols-outlined text-[11px]">home</span>Remote
